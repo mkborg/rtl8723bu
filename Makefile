@@ -49,7 +49,8 @@ CONFIG_PNO_SUPPORT = n
 CONFIG_PNO_SET_DEBUG = n
 CONFIG_AP_WOWLAN = n
 ###################### Platform Related #######################
-CONFIG_PLATFORM_I386_PC = y
+CONFIG_PLATFORM_I386_PC = n
+CONFIG_PLATFORM_ARM_OLIMEX_AIRLOCK = y
 ###############################################################
 
 CONFIG_DRVEXT_MODULE = n
@@ -264,12 +265,18 @@ INSTALL_PREFIX :=
 endif
 
 
+ifeq ($(CONFIG_PLATFORM_ARM_OLIMEX_AIRLOCK), y)
+EXTRA_CFLAGS += -DCONFIG_LITTLE_ENDIAN
+EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211
+EXTRA_CFLAGS += -DRTW_USE_CFG80211_STA_EVENT # only enable when kernel >= 3.2
+EXTRA_CFLAGS += -DCONFIG_P2P_IPS
+endif
+
+
 ifneq ($(USER_MODULE_NAME),)
 MODULE_NAME := $(USER_MODULE_NAME)
 endif
 
-
-ifneq ($(KERNELRELEASE),)
 
 rtk_core :=	core/rtw_cmd.o \
 		core/rtw_security.o \
@@ -315,11 +322,9 @@ $(MODULE_NAME)-$(CONFIG_MP_INCLUDED) += core/rtw_mp.o \
 
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= core/rtw_bt_mp.o
 
+CONFIG_RTL8723BU = m
 obj-$(CONFIG_RTL8723BU) := $(MODULE_NAME).o
 
-else
-
-export CONFIG_RTL8723BU = m
 
 all: modules
 
@@ -348,4 +353,3 @@ clean:
 	rm -fr Module.symvers ; rm -fr Module.markers ; rm -fr modules.order
 	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
 	rm -fr .tmp_versions
-endif
