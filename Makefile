@@ -20,8 +20,6 @@ EXTRA_CFLAGS += -I$(src)/include
 
 EXTRA_LDFLAGS += --strip-debug
 
-CONFIG_AUTOCFG_CP = n
-
 ########################## WIFI IC ############################
 CONFIG_RTL8723B = y
 ######################### Interface ###########################
@@ -59,9 +57,6 @@ CONFIG_DRVEXT_MODULE = n
 export TopDIR ?= $(shell pwd)
 
 ########### COMMON  #################################
-ifeq ($(CONFIG_USB_HCI), y)
-HCI_NAME = usb
-endif
 
 
 _OS_INTFS_FILES :=	os_dep/osdep_service.o \
@@ -111,35 +106,32 @@ endif
 
 ########### HAL_RTL8723B #################################
 
-RTL871X = rtl8723b
-ifeq ($(CONFIG_USB_HCI), y)
-MODULE_NAME = 8723bu
-endif
+MODULE_NAME = rtl8723bu
 
 EXTRA_CFLAGS += -DCONFIG_RTL8723B
 
 _HAL_INTFS_FILES += hal/HalPwrSeqCmd.o \
 					hal/Hal8723BPwrSeq.o\
-					hal/$(RTL871X)_sreset.o
+					hal/rtl8723b_sreset.o
 
-_HAL_INTFS_FILES +=	hal/$(RTL871X)_hal_init.o \
-			hal/$(RTL871X)_phycfg.o \
-			hal/$(RTL871X)_rf6052.o \
-			hal/$(RTL871X)_dm.o \
-			hal/$(RTL871X)_rxdesc.o \
-			hal/$(RTL871X)_cmd.o \
+_HAL_INTFS_FILES +=	hal/rtl8723b_hal_init.o \
+			hal/rtl8723b_phycfg.o \
+			hal/rtl8723b_rf6052.o \
+			hal/rtl8723b_dm.o \
+			hal/rtl8723b_rxdesc.o \
+			hal/rtl8723b_cmd.o \
 			
 
 _HAL_INTFS_FILES +=	\
 			hal/usb_halinit.o \
-			hal/rtl$(MODULE_NAME)_led.o \
-			hal/rtl$(MODULE_NAME)_xmit.o \
-			hal/rtl$(MODULE_NAME)_recv.o
+			hal/rtl8723bu_led.o \
+			hal/rtl8723bu_xmit.o \
+			hal/rtl8723bu_recv.o
 
 _HAL_INTFS_FILES += hal/usb_ops.o
 
 ifeq ($(CONFIG_MP_INCLUDED), y)
-_HAL_INTFS_FILES += hal/$(RTL871X)_mp.o
+_HAL_INTFS_FILES += hal/rtl8723b_mp.o
 endif
 
 _OUTSRC_FILES += hal/HalHWImg8723B_BB.o\
@@ -152,12 +144,6 @@ _OUTSRC_FILES += hal/HalHWImg8723B_BB.o\
 			hal/odm_RTL8723B.o
 
 
-########### AUTO_CFG  #################################	
-		
-ifeq ($(CONFIG_AUTOCFG_CP), y)
-$(shell cp $(TopDIR)/autoconf_$(RTL871X)_usb_linux.h $(TopDIR)/include/autoconf.h)
-endif
-
 ########### END OF PATH  #################################
 
 
@@ -166,7 +152,6 @@ EXTRA_CFLAGS += -DCONFIG_USB_AUTOSUSPEND
 endif
 
 ifeq ($(CONFIG_MP_INCLUDED), y)
-#MODULE_NAME := $(MODULE_NAME)_mp
 EXTRA_CFLAGS += -DCONFIG_MP_INCLUDED
 endif
 
@@ -328,9 +313,7 @@ $(MODULE_NAME)-y += $(_PLATFORM_FILES)
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED) += core/rtw_mp.o \
 					core/rtw_mp_ioctl.o
 
-ifeq ($(CONFIG_RTL8723B), y)
 $(MODULE_NAME)-$(CONFIG_MP_INCLUDED)+= core/rtw_bt_mp.o
-endif
 
 obj-$(CONFIG_RTL8723BU) := $(MODULE_NAME).o
 
@@ -354,10 +337,6 @@ uninstall:
 	rm -f $(MODDESTDIR)/$(MODULE_NAME).ko
 	/sbin/depmod -a ${KVER}
 
-config_r:
-	@echo "make config"
-	/bin/bash script/Configure script/config.in
-
 
 .PHONY: modules clean
 
@@ -370,4 +349,3 @@ clean:
 	rm -fr *.mod.c *.mod *.o .*.cmd *.ko *~
 	rm -fr .tmp_versions
 endif
-
