@@ -1,5 +1,31 @@
 config RTL8723BU
-	tristate "Realtek 8723B USB WiFi"
-	depends on USB
+	tristate "Realtek RTL8723BU Wireless LAN NIC driver"
+	depends on USB && WLAN && RFKILL
+	select WIRELESS_EXT
+	select WEXT_PRIV
+	select CFG80211
+	default n
 	---help---
-	  Help message of RTL8723BU
+	This option adds the Realtek RTL8723BU USB device. If built as a
+	module, it will be called rtl8723bu.
+
+if RTL8723BU
+
+config RTL8723BU_AP_MODE
+	bool "Realtek RTL8723BU AP mode"
+	default y
+	---help---
+	This option enables Access Point mode. Unless you know that your system
+	will never be used as an AP, or the target system has limited memory,
+	"Y" should be selected.
+
+config RTL8723BU_BT_COEXIST
+	bool "Realtek RTL8723BU BlueTooth Coexistence"
+	default y
+	---help---
+	This option enables coexistence with BlueTooth communications for the
+	rtl8723bu driver. Unless you know that this driver will never by used
+	with BT, or the target system has limited memory, "Y" should be
+	selected.
+
+endif
