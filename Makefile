@@ -24,10 +24,26 @@ EXTRA_LDFLAGS += --strip-debug
 
 CONFIG_AUTOCFG_CP = n
 
+## Airlock add-on
+ifneq ($(CUSTOM_USB_BUS),)
+EXTRA_CFLAGS += -DCUSTOM_USB_BUS=$(CUSTOM_USB_BUS)
+EXTRA_CFLAGS += -DCUSTOM_USB_BUS_S=\"$(CUSTOM_USB_BUS)\"
+CUSTOM_MODULE_NAME = _$(CUSTOM_USB_BUS)
+endif
+
+ifneq ($(CUSTOM_USB_DEV),)
+EXTRA_CFLAGS += -DCUSTOM_USB_DEV=$(CUSTOM_USB_DEV)
+EXTRA_CFLAGS += -DCUSTOM_USB_DEV_S=\"$(CUSTOM_USB_DEV)\"
+CUSTOM_MODULE_NAME = _$(CUSTOM_USB_BUS)_$(CUSTOM_USB_DEV)
+endif
+
+
+
+
 ########################## WIFI IC ############################
 CONFIG_RTL8723B = y
 ########################## Features ###########################
-CONFIG_POWER_SAVING = y
+CONFIG_POWER_SAVING = n
 CONFIG_USB_AUTOSUSPEND = n
 CONFIG_HW_PWRP_DETECTION = n
 CONFIG_WIFI_TEST = n
@@ -109,7 +125,8 @@ endif
 ########### HAL_RTL8723B #################################
 
 RTL871X = rtl8723b
-MODULE_NAME = 8723bu
+MODULE_NAME = 8723bu$(CUSTOM_MODULE_NAME)
+MODULE_NAME_ORIG = 8723bu
 
 _HAL_INTFS_FILES += hal/HalPwrSeqCmd.o \
 					hal/Hal8723BPwrSeq.o\
@@ -125,9 +142,9 @@ _HAL_INTFS_FILES +=	hal/$(RTL871X)_hal_init.o \
 
 _HAL_INTFS_FILES +=	\
 			hal/usb_halinit.o \
-			hal/rtl$(MODULE_NAME)_led.o \
-			hal/rtl$(MODULE_NAME)_xmit.o \
-			hal/rtl$(MODULE_NAME)_recv.o
+			hal/rtl$(MODULE_NAME_ORIG)_led.o \
+			hal/rtl$(MODULE_NAME_ORIG)_xmit.o \
+			hal/rtl$(MODULE_NAME_ORIG)_recv.o
 
 _HAL_INTFS_FILES += hal/usb_ops.o
 
@@ -246,6 +263,7 @@ EXTRA_CFLAGS += -DCONFIG_GPIO_WAKEUP
 endif
 
 
+
 ifeq ($(CONFIG_PLATFORM_I386_PC), y)
 EXTRA_CFLAGS += -DCONFIG_IOCTL_CFG80211
 EXTRA_CFLAGS += -DRTW_USE_CFG80211_STA_EVENT # only enable when kernel >= 3.2
@@ -258,7 +276,6 @@ KSRC := /lib/modules/$(KVER)/build
 MODDESTDIR := /lib/modules/$(KVER)/kernel/drivers/net/wireless/
 INSTALL_PREFIX :=
 endif
-
 
 ifneq ($(USER_MODULE_NAME),)
 MODULE_NAME := $(USER_MODULE_NAME)
@@ -309,7 +326,7 @@ $(MODULE_NAME)-y += $(_PLATFORM_FILES)
 obj-$(CONFIG_RTL8723BU) := $(MODULE_NAME).o
 
 else
-
+ccflags-y := -DCONFIG_CUSTOM_UBUS
 export CONFIG_RTL8723BU = m
 
 all: modules
