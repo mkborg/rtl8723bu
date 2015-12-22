@@ -1239,12 +1239,51 @@ static int rtw_drv_init(struct usb_interface *pusb_intf, const struct usb_device
 	_adapter *if1 = NULL, *if2 = NULL;
 	int status = _FAIL;
 	struct dvobj_priv *dvobj;
+	int bus = 0x0, dev = 0x0;
+	struct usb_device *usbdev = interface_to_usbdev(pusb_intf);
 #ifdef CONFIG_MULTI_VIR_IFACES
 	int i;
 #endif //CONFIG_MULTI_VIR_IFACES
 
 	RT_TRACE(_module_hci_intfs_c_, _drv_err_, ("+rtw_drv_init\n"));
 	//DBG_871X("+rtw_drv_init\n");
+
+#ifdef CUSTOM_USB_BUS
+	bus = CUSTOM_USB_BUS;
+#warning "Driver building for custom USB-BUS"
+
+#ifdef CUSTOM_USB_DEV
+	dev = CUSTOM_USB_DEV;
+#warning "Driver building for custom USB-DEV"
+#endif /* CUSTOM_USB_DEV */
+	printk("Found %s on usb bus:%d dev:%d\n",
+			RTL871X_MODULE_NAME, usbdev->bus->busnum, usbdev->devnum);
+
+	if(dev)
+		printk("This driver work only with bus:%d devno:%d\n", bus, dev);
+	else
+		printk("This driver work only with bus:%d devno: ANY\n", bus);
+
+	if(usbdev->bus->busnum != bus)	{
+		printk("Rejecting %s on usb bus:%d dev:%d - wrong busno.\n",
+					RTL871X_MODULE_NAME, usbdev->bus->busnum, usbdev->devnum);
+				return -ENODEV;
+
+	} else	{
+		if(dev){
+			if(dev != usbdev->devnum) {
+				printk("Rejecting %s on usb bus:%d dev:%d - wrong devno.\n",
+						RTL871X_MODULE_NAME, usbdev->bus->busnum, usbdev->devnum);
+				return -ENODEV;
+			}
+		}
+	}
+
+	printk("Accepting %s on usb bus:%d dev:%d\n",
+				RTL871X_MODULE_NAME, usbdev->bus->busnum, usbdev->devnum);
+
+
+#endif /* CUSTOM_USB_BUS */
 
 	//step 0.
 	process_spec_devid(pdid);

@@ -27,8 +27,19 @@
  * Public  General Config
  */
 #define AUTOCONF_INCLUDED
+
+#if defined (CUSTOM_USB_BUS) && defined (CUSTOM_USB_DEV)
+#define RTL871X_MODULE_NAME "8723BU_"CUSTOM_USB_BUS_S"_"CUSTOM_USB_DEV_S
+#define DRV_NAME "rtl8723bu_"CUSTOM_USB_BUS_S"_"CUSTOM_USB_DEV_S
+#elif defined (CUSTOM_USB_BUS)
+#define RTL871X_MODULE_NAME "8723BU_"CUSTOM_USB_BUS_S
+#define DRV_NAME "rtl8723bu_"CUSTOM_USB_BUS_S
+#elif defined (CUSTOM_USB_DEV)
+#error "USB DEVICE IS SET - BUT USB BUS IS NOT SET"
+#else
 #define RTL871X_MODULE_NAME "8723BU"
 #define DRV_NAME "rtl8723bu"
+#endif
 
 #define BT_30_SUPPORT 1
 
@@ -71,7 +82,7 @@
 #endif
 
 
-#define CONFIG_IPS	1
+//#define CONFIG_IPS	1
 #ifdef CONFIG_IPS
 	//#define CONFIG_IPS_LEVEL_2	1 //enable this to set default IPS mode to IPS_LEVEL_2
 #endif

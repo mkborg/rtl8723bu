@@ -24,10 +24,26 @@ EXTRA_LDFLAGS += --strip-debug
 
 CONFIG_AUTOCFG_CP = n
 
+## Airlock add-on
+ifneq ($(CUSTOM_USB_BUS),)
+EXTRA_CFLAGS += -DCUSTOM_USB_BUS=$(CUSTOM_USB_BUS)
+EXTRA_CFLAGS += -DCUSTOM_USB_BUS_S=\"$(CUSTOM_USB_BUS)\"
+MODULE_NAME_SUFFIX = _$(CUSTOM_USB_BUS)
+endif
+
+ifneq ($(CUSTOM_USB_DEV),)
+EXTRA_CFLAGS += -DCUSTOM_USB_DEV=$(CUSTOM_USB_DEV)
+EXTRA_CFLAGS += -DCUSTOM_USB_DEV_S=\"$(CUSTOM_USB_DEV)\"
+MODULE_NAME_SUFFIX = _$(CUSTOM_USB_BUS)_$(CUSTOM_USB_DEV)
+endif
+
+
+
+
 ########################## WIFI IC ############################
 CONFIG_RTL8723B = y
 ########################## Features ###########################
-CONFIG_POWER_SAVING = y
+CONFIG_POWER_SAVING = n
 CONFIG_USB_AUTOSUSPEND = n
 CONFIG_HW_PWRP_DETECTION = n
 CONFIG_WIFI_TEST = n
@@ -109,7 +125,7 @@ endif
 ########### HAL_RTL8723B #################################
 
 RTL871X = rtl8723b
-MODULE_NAME = 8723bu
+MODULE_NAME = 8723bu$(MODULE_NAME_SUFFIX)
 
 _HAL_INTFS_FILES += hal/HalPwrSeqCmd.o \
 					hal/Hal8723BPwrSeq.o\
@@ -125,9 +141,9 @@ _HAL_INTFS_FILES +=	hal/$(RTL871X)_hal_init.o \
 
 _HAL_INTFS_FILES +=	\
 			hal/usb_halinit.o \
-			hal/rtl$(MODULE_NAME)_led.o \
-			hal/rtl$(MODULE_NAME)_xmit.o \
-			hal/rtl$(MODULE_NAME)_recv.o
+			hal/rtl8723bu_led.o \
+			hal/rtl8723bu_xmit.o \
+			hal/rtl8723bu_recv.o
 
 _HAL_INTFS_FILES += hal/usb_ops.o
 
